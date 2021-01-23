@@ -2,7 +2,7 @@
 
 
 
-Finanzas
+
 
 Este curso es la continuación de Estadística I, en donde se estudiaron los conceptos de Estadística Descriptiva y Teoría de Probabilidad. En este curso se enfocará la atención en la Inferencia Estadística, como el conjunto de herramientas útiles para analizar y hacer afirmaciones sobre conjuntos de datos, con el apoyo teórico de la probabilidad y la Estadística Matemática
 
