@@ -27,3 +27,14 @@ Este curso es la continuación de Estadística I, en donde se estudiaron los con
 | 14 |Tabla ANOVA. Validación de supuestos. Clasificación jerárquica de las medias poblacionales.|
 | 15 |Correlación Pearson y Spearman. Introducción a la Regresión lineal simple. Conceptos básicos, supuestos y estimación de parámetros.|
 | 16 |Inferencia acerca de los parámetros del modelo y pronóstico.|
+
+
+ 	Anderson D., Sweeney D. y Williams T. (2011). Statistics for Business and Economics. Eleventh Edition. Cengage.
+ 	Lind, D. A., Marchal, W. G., & Wathen, S. A. (2012). Estadística aplicada a los negocios y la economía. México: McGraw-Hill / Interamericana. 15 ed.
+ 	Newbold, Paul y Otros. (2013). Estadística para administración y economía. 8 Edición. Pearson.
+ 	Mendenhall, W., Beaver, R. y Beaver, B. (2015). Introducción a la Probabilidad y la Estadística. Cengage Learning. 14 Edición.
+ 	SOSA, J. C., OSPINA, L. E., and BERDUGO, E. P. (2013). Estadística descriptiva y probabilidades. Universidad Externado de Colombia.
+ 	Levin R. y Rubín D. (2010). Estadística para Administración y Economía. Prentice Hall. Séptima Edición.
+ 	Dalgaard, P. (2008). Introductory statistics with R. Springer.
+ 	Albert, J., Rizzo, M. (2012). R by Example. Springer.
+
