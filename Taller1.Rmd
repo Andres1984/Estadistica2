@@ -1,0 +1,195 @@
+---
+title: "Taller Estadística 2"
+author: "Andrés Martínez"
+date: "1/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Taller de Repaso
+
+Retomemos la clase inicial y pensemos nuevamente como podemos tarnsformar situaciones del mercado en experimentos que podemos medir con distribuciones discretas y continuas.
+
+## Distribuciones discretas
+
+
+
+###  Distribución discreta uniforme
+
+Existe la posibilidad de que existan entre 5 y 15 ordenes en el premarket
+
+(i) Calcule la media y la varianza analítica de la distribución uniforme 
+\begin{align*}
+\href{https://de.wikipedia.org/wiki/Diskrete_Gleichverteilung}{x \sim U(a=5,b=15)}
+\end{align*}
+
+(ii) Grafique la función de probabilidad y acumulada.
+
+(iii) Genere 10,000 números aleatorios que se distribuyen de forma uniforme \texttt{x=sample(a:b,size=nobs,replace=TRUE)} y grafique la función de probabilidad y la función de densidad acumulada.
+
+(iv) Calcule la media y la varianza de los datos simulados, compare los resultados con el numeral i) e interprete. 
+
+```{r}
+
+
+
+```
+
+
+### Binomial Distribution
+
+Podrían haber hasta 40 ordenes en un día si la probabilidad de que una acción suba el 60\%, como podría saber su valor promedio
+
+(i)  Calcule la media y la varianza analítica de la distribución binomial
+\begin{align*}
+\href{https://en.wikipedia.org/wiki/Binomial_distribution}{x \sim B(n=40,p=0.6)}
+\end{align*}
+
+(ii) Grafique la función de probabilidad y acumulada .
+
+(iii) Genere 10,000 números aleatorios que se distribuyen de forma binomial
+\texttt{x=rbinom(nobs,size,prob))} y grafique la función de probabilidad y la función de densidad acumulada. 
+
+(iv) Calcule la media y la varianza de los datos simulados, compare los resultados con el numeral i) e interprete. 
+
+```{r}
+
+```
+
+
+### Geometric Distribution
+
+Si el precio de una acción comienza descender, con qué probabilidad cree usted que un inversionista decida cerrar la posición después diez veces que el revisa los precios y estos siempre son menores que los anteriores.
+
+(i)Calcule la media y la varianza analítica de la distribución geométrica
+\begin{align*}
+\href{https://en.wikipedia.org/wiki/Geometric_distribution}{x \sim Geom(p=0.1)}
+\end{align*}
+
+(ii) Grafique la función de probabilidad y acumulada.
+
+(iii) Genere 10,000 números aleatorios que se distribuyen de forma geométrica \\ \texttt{x=rgeom(nobs, p)} y grafique la función de probabilidad y la función de densidad acumulada. 
+
+(iv) Calcule la media y la varianza de los datos simulados, compare los resultados con el numeral i) e interprete. 
+
+```{r}
+
+```
+
+
+
+### Distribución Poisson
+
+
+
+(i)Calcule la media y la varianza analítica de la distribución poisson
+\begin{align*}
+\href{https://en.wikipedia.org/wiki/Poisson_distribution}{x \sim Pois(\lambda=5,n=6)}
+\end{align*}
+
+(ii) Grafique la función de probabilidad y acumulada.
+
+(iii) Genere 10,000 números aleatorios que se distribuyen de forma geométrica \\ \texttt{x=rpois(nobs, lambda)} y grafique la función de probabilidad y la función de densidad acumulada. 
+
+(iv) Calcule la media y la varianza de los datos simulados, compare los resultados con el numeral i) e interprete. 
+
+## Distribuciones Continuas
+
+Después de lo que hablamos en clase, intente  crear un enunciado para cada una de las distribuciones.
+
+
+### Distribución Uniforme
+
+Qué tipo de experimento puede diferencia una distribución uniforme discreta y continua
+
+(i) Calcule la media y la varianza analítica de la distribución uniforme 
+\begin{align*}
+\href{https://de.wikipedia.org/wiki/Stetige_Gleichverteilung}{x \sim U(a=1,b=11)}
+\end{align*}
+
+(ii) Grafique la función de probabilidad y densidad usando \texttt{dunif()} and \texttt{punif()}.
+
+(iii) Genere 10.000 datos simulados de manera uniforme\\\texttt{x = runif(nobs,a,b)} y grafique la función de densidad y probabilidad usando \texttt{density()} y \texttt{ecdf()}.
+
+(iv) Calcule la media y la varianza de los datos simulados, compare los resultados.
+
+```{r}
+
+```
+
+
+### Distribución Beta
+
+Se usa muchas veces  cuando no se conoce el valor inicial de la data y se desea simplemente estimar la probabilidad usando valores a priori
+
+(i) Calcule la media y la varianza analítica de la distribución beta
+\begin{align*}
+\href{https://en.wikipedia.org/wiki/Beta_distribution}{x \sim Beta(\alpha=0.5,\beta=0.5)}
+\end{align*}
+
+(ii) Grafique la función de probabilidad y acumulada \texttt{dbeta()} y \texttt{pbeta()}.
+
+(iii) Genere 10,000 datos aleatorios con este comnado \texttt{x=rbeta(nobs,shape1,shape2)} y grafique la función acumulada y probabilidad usando \texttt{density()} and \texttt{ecdf()}.
+
+(iv)  Calcule la media y la varianza de los datos simulados, compare los resultados.
+
+```{r}
+
+```
+
+ 
+### Distribución Normal
+(i) Calcule la media y la varianza analítica de la distribución normal
+\begin{align*}
+\href{https://en.wikipedia.org/wiki/Normal_distribution}{x \sim N(\mu= 0.1,\sigma=0.3)}
+\end{align*}
+
+(ii) Grafique la función de probabilidad y acumulada  \texttt{dnorm()} y \texttt{pnorm()}.
+
+(iii) Genere 10,000 datos aleatorios con este comnado \texttt{x=rnorm(nobs,mean,sd)} y grafique la función acumulada y probabilidad usando \texttt{density()} and \texttt{ecdf()}.
+
+(iv) Calcule la media y la varianza de los datos simulados, compare los resultados.
+
+
+### Distribución t Student
+(i) Calcule la media y la varianza analítica de la distribución t Student
+\begin{align*}
+\href{https://en.wikipedia.org/wiki/Student\%27s_t-distribution}{x \sim t_{df=5}}
+\end{align*}
+
+(ii) Grafique la función de probabilidad y acumulada  \texttt{dt()} y \texttt{pt()}.
+
+(iii) Genere 10,000 datos aleatorios con este comnado \texttt{x=rt(nobs,df))}  grafique la función acumulada y probabilidad usando\texttt{density()} y \texttt{ecdf()}.
+
+(iv) Calcule la media y la varianza de los datos simulados, compare los resultados.
+
+
+```{r}
+
+```
+
+
+### Distribución Chi-Square 
+
+Que tiene que ver la volatilidad con esta distribución
+
+(i) Calcule la media y la varianza analítica de la distribución Chi Square
+\begin{align*}
+\href{https://en.wikipedia.org/wiki/Chi-squared_distribution}{x \sim \chi^2_{k=3}}
+\end{align*}
+
+(ii) Grafique la función de probabilidad y acumulada  \texttt{dchisq()} y \texttt{pchisq()}.
+
+(iii) Genere 10,000 datos aleatorios con este comnado \texttt{x=rchisq(nobs,df)} grafique la función acumulada y probabilidad usando\texttt{density()} y \texttt{ecdf()}.
+
+(iv) Calcule la media y la varianza de los datos simulados, compare los resultados.
+
+
+
+```{r}
+
+```
+
