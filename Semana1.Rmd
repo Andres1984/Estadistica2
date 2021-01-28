@@ -1,0 +1,73 @@
+---
+title: "Semana1"
+author: "Andrés Martínez"
+date: "1/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Repaso primera semana
+
+Vamos a trabajar algunas distribuciones. Primero vamos a usar una libreria que se llama quantmod y vamos a descargar unos datos.
+
+
+```{r , echo=FALSE,warning=FALSE,message=FALSE}
+
+library(quantmod)
+
+getSymbols(c("GME","TSLA"),src="yahoo",from="2015-12-31",to="2021-01-08")## Una función de quantmod
+
+
+```
+
+
+
+
+## 
+
+```{r}
+plot(GME$GME.Close)
+```
+
+
+```{r }
+dgme=density(GME$GME.Close)
+plot(dgme,col="red",type="l")
+
+
+```
+
+```{r}
+
+gme=Delt(GME$GME.Close)[-1]
+names(gme)="GME"
+hist(gme,breaks=50, col="blue")
+
+
+```
+```{r}
+drgme=density(gme)
+plot(drgme,col="red",type="l")
+plot(gme,type="l")
+```
+```{r}
+media=mean(gme)
+sde=sd(gme)
+X = rnorm(10000) # X is a sample of 10000 normally distributed random variables
+P = ecdf(X)    # P is a function giving the empirical CDF of X
+P(0.0)         # This returns the empirical CDF at zero (should be close to 0.5)
+plot(P) 
+
+```
+```{r}
+
+X = rnorm(length(gme),media,sde)
+
+p=density(X)
+plot(drgme,col="red",main="GME Density")
+lines(p,col="green")
+```
+
