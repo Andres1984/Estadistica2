@@ -60,6 +60,7 @@ X = rnorm(10000) # X is a sample of 10000 normally distributed random variables
 P = ecdf(X)    # P is a function giving the empirical CDF of X
 P(0.0)         # This returns the empirical CDF at zero (should be close to 0.5)
 plot(P) 
+abline(h = 0.5, col="blue")
 
 ```
 ```{r}
