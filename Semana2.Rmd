@@ -1,0 +1,131 @@
+---
+title: "Muestreo"
+author: "Andrés Martínez"
+date: "1/31/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Ejemplo
+
+Para entender un poco mejor los métodos de muestreo, vamos a utilizar una base de datos que contiene los índices de felicidad de 150 países. El puesto de cada país se determina de acuerdo a unos criterios que incrementan el puntaje. El país con mayor puntaje es más feliz. 
+
+```{r ,echo=FALSE,warning=FALSE,message=FALSE}
+library(RCurl)# La dirección web
+library(readr)# La base de datos en cvs o txt
+text=getURL("https://raw.githubusercontent.com/Andres1984/Data-Analysis-with-R/master/Bases/2016.csv")
+H2016 <- read_csv(file=text)
+
+```
+
+
+
+
+
+## Gráficos con GGplot
+
+```{r, echo=FALSE,warning=FALSE,message=FALSE}
+# Preparación de la Base
+
+library(ggplot2)
+library(viridis)
+colnames(H2016)[7] <- "GDP"
+colnames(H2016)[9] <- "Health"
+colnames(H2016)[11] <- "TrustG"
+colnames(H2016)[4]<-"HScore"
+```
+
+
+```{r , echo = FALSE,message=FALSE,warning=FALSE}
+library(plotly)
+p1 <- plot_ly(y = H2016$GDP, type = "box",name="GDP") 
+p2<-  plot_ly(y = H2016$HScore,type="box",name="HScore")
+p3<-  plot_ly(y = H2016$Generosity,type="box",name="Generosidad")
+p4<-  plot_ly(y = H2016$TrustG,type="box",name="Trust")
+p<-subplot(p1,p2,p3,p4)
+p 
+```
+
+
+
+```{r , echo = FALSE,message=FALSE,warning=FALSE}
+library(plotly)
+c <- H2016 %>%  ggplot(aes(Health, HScore, col=Region, text =  paste("Country:", Country, "<br>", "Happiness:",HScore, "<br>", "Economy:", GDP, "<br>", "Family:", Family, "<br>", "Health:", Health, "<br>", "Freedom:", Freedom, "<br>", "Trust:", TrustG, "<br>", "Generosity:", Generosity)))+
+  geom_point(size=4, alpha=0.5)+
+  scale_color_brewer(palette = 'Reds')
+ggplotly(c)
+```
+
+
+
+
+
+### Muestreo Aleatorio Simple
+
+Solo escogemos al azar observaciones de la base de datos sin prestar atención a sus características
+
+```{r }
+set.seed(3)
+ma=H2016[sample(nrow(H2016), 3),]
+ma
+```
+
+### Muestreo estratificado
+
+En estre caso, se asume que la información de cada uno de los estratos es homogena y por lo tanto se puede escoger de forma aleatoria de cada grupo. Por lo tanto, primero se debe determinar bajo que criterios se considera una población homogenea. Para esto se puede obtener por ejemplo los cuartiles de la variable Happiness Score
+
+```{r}
+
+q=quantile(H2016$HScore)
+primero=subset(x = H2016, subset = HScore <= q[2])
+segundo=subset(x = H2016, subset = HScore <= q[3] & HScore > q[2] )
+tercero=subset(x = H2016, subset = HScore > q[3])
+
+### Muestreo 
+
+a=primero[sample(nrow(primero), 3),]
+b=segundo[sample(nrow(segundo), 3),]
+c=tercero[sample(nrow(tercero), 3),]
+
+ms=rbind(a,b,c)
+ms
+```
+
+
+
+### Muestreo por conglomerados
+
+```{r}
+region=unique(H2016$Region)
+europa=subset(x = H2016, subset = Region==region[1] | Region==region[7])
+america=subset(x = H2016, subset = Region==region[2] | Region==region[5] )
+asia=subset(x = H2016, subset = Region==region[8] | Region==region[10] )
+africa=subset(x = H2016, subset = Region==region[9] | Region==region[4] )
+oceania=subset(x = H2016, subset = Region==region[3] | Region==region[6] )
+
+
+a=europa[sample(nrow(europa), round( dim(europa)[1]*0.1)),]
+b=america[sample(nrow(america), round( dim(america)[1]*0.1)),]
+c=asia[sample(nrow(asia), round( dim(asia)[1]*0.1)),]
+d=africa[sample(nrow(africa), round( dim(africa)[1]*0.1)),]
+e=oceania[sample(nrow(oceania), round( dim(oceania)[1]*0.1)),]
+
+mc=rbind(a,b,c,d,e)
+mc
+
+```
+
+
+### Ejercicio
+
+Analice la data de Credit que se encuentra en la libreria ISLR. Realice cada uno de los métodos de muestreo que aprendió en clase. Bajo que categorias se podría hacer un muestreo estratificado y uno conglomerado. Idee al menos dos preguntas que le gustaría resolver con ayuda de estos métodos de muestreo.
+
+```{r}
+library(ISLR)
+
+head(Credit)
+```
+
