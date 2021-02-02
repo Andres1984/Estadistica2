@@ -6,7 +6,7 @@
 
 Este curso es la continuación de Estadística I, en donde se estudiaron los conceptos de Estadística Descriptiva y Teoría de Probabilidad. En este curso se enfocará la atención en la Inferencia Estadística, como el conjunto de herramientas útiles para analizar y hacer afirmaciones sobre conjuntos de datos, con el apoyo teórico de la probabilidad y la Estadística Matemática.
 
-En la carpeta Códigos encuentran el contenido de R. En la carpeta de Bases, se encuentran los archivos en excel, csv o txt que usaremos en las clases.
+En la carpeta Códigos encuentran el contenido de R. En la carpeta de Bases, se encuentran los archivos en excel, csv o txt que usaremos en las clases. En la carpeta contenido se encuentra la presentación. Finalmente en la carpeta de Talleres, se encuentran las actividades complementarias del semestre.
 
 
 
