@@ -148,6 +148,15 @@ mediamc
 
 Analice la data de Credit que se encuentra en la libreria ISLR. Realice cada uno de los métodos de muestreo que aprendió en clase. Bajo que categorias se podría hacer un muestreo estratificado y uno conglomerado. Idee al menos dos preguntas que le gustaría resolver con ayuda de estos métodos de muestreo.
 
+
+Inicie con una exploración de datos
+
+* Gráficos
+* Medidas descriptivas
+* Relaciones
+* Intente definir una variable dependiente
+* Definas varias variables independientes
+
 ```{r}
 library(ISLR)
 
