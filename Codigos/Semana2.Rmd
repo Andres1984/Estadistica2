@@ -1,7 +1,7 @@
 ---
 title: "Muestreo"
 author: "Andrés Martínez"
-date: "1/31/2021"
+date: "2/3/2021"
 output: html_document
 ---
 
@@ -14,11 +14,11 @@ knitr::opts_chunk$set(echo = TRUE)
 Para entender un poco mejor los métodos de muestreo, vamos a utilizar una base de datos que contiene los índices de felicidad de 150 países. El puesto de cada país se determina de acuerdo a unos criterios que incrementan el puntaje. El país con mayor puntaje es más feliz. 
 
 ```{r ,echo=FALSE,warning=FALSE,message=FALSE}
-library(RCurl)# La dirección web
+library(httr)# Otra forma de encontrar direcciones
 library(readr)# La base de datos en cvs o txt
-text=getURL("https://raw.githubusercontent.com/Andres1984/Data-Analysis-with-R/master/Bases/2016.csv")
+url1<-'https://raw.githubusercontent.com/Andres1984/Data-Analysis-with-R/master/Bases/2016.csv'
+GET(url1, write_disk(text <- tempfile(fileext = ".csv"))) 
 H2016 <- read_csv(file=text)
-
 ```
 
 
@@ -53,12 +53,22 @@ p
 
 ```{r , echo = FALSE,message=FALSE,warning=FALSE}
 library(plotly)
-c <- H2016 %>%  ggplot(aes(Health, HScore, col=Region, text =  paste("Country:", Country, "<br>", "Happiness:",HScore, "<br>", "Economy:", GDP, "<br>", "Family:", Family, "<br>", "Health:", Health, "<br>", "Freedom:", Freedom, "<br>", "Trust:", TrustG, "<br>", "Generosity:", Generosity)))+
+c <- H2016 %>%  ggplot(aes(GDP, HScore, col=Region, text =  paste("Country:", Country, "<br>", "Happiness:",HScore, "<br>", "Economy:", GDP, "<br>", "Family:", Family, "<br>", "Health:", Health, "<br>", "Freedom:", Freedom, "<br>", "Trust:", TrustG, "<br>", "Generosity:", Generosity)))+
   geom_point(size=4, alpha=0.5)+
   scale_color_brewer(palette = 'Reds')
 ggplotly(c)
 ```
 
+```{r}
+
+
+medias=colMeans(H2016[,4:12])
+medias
+varianza=var(H2016[,4:12])
+varianza=diag(varianza)
+varianza
+
+```
 
 
 
@@ -68,9 +78,16 @@ ggplotly(c)
 Solo escogemos al azar observaciones de la base de datos sin prestar atención a sus características
 
 ```{r }
-set.seed(3)
-ma=H2016[sample(nrow(H2016), 3),]
-ma
+set.seed(123456)
+ma=H2016[sample(nrow(H2016), 9),]
+
+
+mediama=colMeans(ma[,4:12])
+varianzama=var(ma[,4:12])
+varianzama=diag(varianzama)
+mediama
+varianzama
+
 ```
 
 ### Muestreo estratificado
@@ -80,6 +97,7 @@ En estre caso, se asume que la información de cada uno de los estratos es homog
 ```{r}
 
 q=quantile(H2016$HScore)
+
 primero=subset(x = H2016, subset = HScore <= q[2])
 segundo=subset(x = H2016, subset = HScore <= q[3] & HScore > q[2] )
 tercero=subset(x = H2016, subset = HScore > q[3])
@@ -91,7 +109,11 @@ b=segundo[sample(nrow(segundo), 3),]
 c=tercero[sample(nrow(tercero), 3),]
 
 ms=rbind(a,b,c)
-ms
+
+
+
+mediams=colMeans(ms[,4:12])
+mediams
 ```
 
 
@@ -100,6 +122,7 @@ ms
 
 ```{r}
 region=unique(H2016$Region)
+
 europa=subset(x = H2016, subset = Region==region[1] | Region==region[7])
 america=subset(x = H2016, subset = Region==region[2] | Region==region[5] )
 asia=subset(x = H2016, subset = Region==region[8] | Region==region[10] )
@@ -114,7 +137,9 @@ d=africa[sample(nrow(africa), round( dim(africa)[1]*0.1)),]
 e=oceania[sample(nrow(oceania), round( dim(oceania)[1]*0.1)),]
 
 mc=rbind(a,b,c,d,e)
-mc
+
+mediamc=colMeans(mc[,4:12])
+mediamc
 
 ```
 
@@ -128,4 +153,3 @@ library(ISLR)
 
 head(Credit)
 ```
-
