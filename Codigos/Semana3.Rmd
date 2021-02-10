@@ -1,0 +1,447 @@
+---
+title: "Semana3"
+author: "Andrés Martínez"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE)
+require("knitcitations")
+cleanbib()
+options("citation_format" = "pandoc")
+
+
+```
+
+
+```{r, echo=FALSE, message=FALSE,results='hide',warning=FALSE}
+#install.packages("bookdown")
+#Librerias que se van a utilizar
+library(kableExtra)# Tablas
+library(quantmod)# Descarga de datos
+library(knitcitations)#Citaciones
+library(knitr)#R Markdown
+library(psych)# Medidas descriptivas
+library(RCurl)# La dirección web
+library(readr)# La base de datos
+library(dplyr)# Transformación de tablas
+library(plotly)# Gráficos Interactivos
+library(ggplot2)# Gráficos 
+library(corrplot)# Gráfico de Correlación
+library(derivmkts)# Pronóstico de Precios
+
+
+
+```
+
+
+# Distribuciones Muestrales
+
+"El estudio sin deseo estropea la memoria y no retiene nada de lo que toma".
+
+---Leonardo da Vinci.
+
+
+## Ley de los grandes números
+
+```{r}
+set.seed(1)
+N = 1000
+n = 10
+
+X = MEAN = NULL
+for (i in 1:N) {
+  x = rchisq(n,df=5)
+  X = c(X,x)
+  MEAN[i] = mean(X)
+}
+
+df = data.frame(x=c(1:N), MEAN)
+p1 = ggplot(df)
+p1 = p1 + geom_line(aes(x=x,y=MEAN))
+p1 = p1 + labs(x="",y="",title="Ley de los grandes números",subtitle="",caption="",fill="")
+p1
+
+```
+
+## Teorema del límite central
+
+
+```{r}
+set.seed(1)
+MEAN = NULL
+
+rep = 100000
+for (i in 1:rep) {
+  MEAN[i] = mean(rchisq(300,df=5))
+}
+
+df = data.frame(x=MEAN)
+p2 = ggplot(df)
+p2 = p2 + geom_density(aes(x=x),fill="black")
+p2 = p2 + guides(fill=FALSE,col=FALSE)
+p2 = p2 + labs(x="",y="",title="Teorema del límite central")
+p2
+
+```
+
+
+```{r}
+n <- 20                       
+nreps <- 10000                 
+sample.mean <- numeric(nreps)  
+par(mfrow = c(1,2))
+
+sample.normal <- rnorm(n = 1000, mean = 35, sd = 15)  
+for (i in 1:nreps) {
+  sample <- rnorm(n = n,mean =  35, sd = 15)  
+  sample.mean[i] <- var(sample)     
+}  
+
+
+hist(sample.normal, breaks = 50, main = "Distribución normal Población", xlab = "")
+hist(sample.mean, breaks = 50, main = "Distribución de la muestra", xlab = "Mean")
+```
+
+
+```{r}
+n <- 20                       
+nreps <- 10000                 
+sample.var <- numeric(nreps)  
+par(mfrow = c(2,2))
+
+sample.normal <- rnorm(n = 1000, mean = 35, sd = 15)  
+for (i in 1:nreps) {
+  sample <- rnorm(n = n,mean =  35, sd = 15)  
+  sample.var[i] <- var(sample)     
+}  
+
+
+hist(sample.normal, breaks = 50, main = "Distribución normal Población", xlab = "")
+hist(sample.var, breaks = 50, main = "Distribución de la varianza", xlab = "Variance")
+
+
+sample.chi <- rchisq(nreps,3)
+
+for (i in 1:nreps) {
+  sample <- rchisq(n = n,df=3)  
+  sample.var[i] <- var(sample)     
+}  
+
+
+hist(sample.chi, breaks = 50, main = "Distribución  Chi Cuadrado", xlab = "")
+hist(sample.var, breaks = 50, main = "Distribución de la muestra", xlab = "Variance")
+```
+
+
+```{r}
+
+n <- 20                       
+nreps <- 10000                 
+sample.meanp <- numeric(nreps) 
+sample.varp <- numeric(nreps) 
+par(mfrow = c(1,3))
+
+sample.prop <- rbinom(n = 10000, 35, prob=0.5)  
+for (i in 1:nreps) {
+  sample <- rbinom(n = 10000, 35, prob=0.5)  
+  sample.meanp[i] <- mean(sample) 
+  sample.varp[i] <- var(sample) 
+}  
+
+
+hist(sample.prop, breaks = 50, main = "Distribución de una Población", xlab = "")
+hist(sample.meanp, breaks = 50, main = "Distribución de la media", xlab = "Mean")
+hist(sample.varp, breaks = 50, main = "Distribución de la Varianza", xlab = "Variance")
+
+
+```
+
+
+
+
+## Ejemplo de simulación
+
+
+```{r, echo=FALSE, message=FALSE,results='hide',warning=FALSE}
+
+
+getSymbols("TSLA",src='yahoo',from="2017-01-01",to="2021-01-01")
+
+```
+
+
+
+
+
+```{r vol, echo=FALSE, message=FALSE,fig.cap='Rendimientos'}
+tsla = Delt(TSLA$TSLA.Close)[-1] # Rendimientos
+names(tsla)="TSLA"
+par(mfrow=c(2,1))
+
+plot(TSLA$TSLA.Close, col="blue",main = "TSLA")
+plot(tsla,col="blue")
+
+
+
+
+```
+
+
+
+## Medición y análisis a través de procesos descriptivos.
+
+
+```{r TED, echo=FALSE, message=FALSE,warning=FALSE}
+library(psych)
+library('knitr')
+rend1=describe(tsla)
+kable(rend1[,3:9], booktabs=TRUE,caption = "Estadísticas Descriptivas")%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+```
+
+```{r TED1, echo=FALSE, message=FALSE,warning=FALSE}
+library('knitr')
+kable(rend1[,10:13], booktabs=TRUE,caption = "Estadísticas Descriptivas")%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+
+
+
+
+
+
+
+
+
+```{r HIST, echo=FALSE,fig.cap='Histogramas', message=FALSE,warning=FALSE,echo=FALSE}
+hist(tsla,breaks = 50,col="blue")
+
+
+
+
+```
+
+
+
+
+
+## El proceso de simulación
+
+## Modelo Binomial para Acciones.
+
+Un ejemplo sencillo puede ser asumir que los precios de las acciones son discretos
+
+
+
+
+```{r AB,fig.cap="Árbol Binomial", fig.width = 8, fig.height = 8,echo=FALSE, message=FALSE,warning=FALSE,echo=FALSE}
+library(derivmkts)
+
+binomplot(as.numeric(tail(TSLA$TSLA.Close, n=1)), 0, sd(tsla)*sqrt(5), (1.002)^(1/52)-1,  4,0, nstep=4, american=TRUE, putopt=TRUE,
+          plotvalues=TRUE, plotarrows=TRUE,titles = FALSE,pointsize = 0,crr=TRUE)
+title("TSLA")
+
+```
+
+El proceso final es  un pronóstico de los precios de la acción para un mes dividido en cuatro semanas como se observa en la figura \@ref(fig:AB) , se puede ver en cada una de las gráficas, que la varianza genera que el precio aumente y se aleje de la media a medida que avanzan las semanas(Aumentan los ensayos). A mayor horizonte de tiempo, mayor sera el grado de dispersión con respecto al valor esperado. 
+
+
+
+
+
+
+
+## Modelo Continuo para acciones
+
+Las  funciones de distribución binomial y normal, pueden generar procesos aleatorios para construir escenarios que permitan obtener una aproximación a los eventos futuros. 
+
+Para realizar el modelo de forma continua, es necesario entender porque se puede transformar un proceso discreto en uno continuo.
+
+En este caso usamos el teorema del límite central  propone la representación de ciertas distribuciones discretas en forma continua, en este caso  la relación que se espera obtener, es la que se encuentra entre la función de distribución binomial y la función de distribución normal.
+
+
+Como se sabe, la distribución normal es aquella que trabaja con variables continuas y que tiene parámetros de media $\mu$ y varianza $\sigma^{2}$, por lo tanto, se dice que una variable aleatoria continua se distribuye $X\sim(\mu,\sigma^{2})$, dado que estas variables obtienen sus parámetros derivados de su comportamiento en el tiempo, entonces se puede decir que  $X_{t}\sim(\mu t, \sigma^{2}t)$ donde $t$ hace referencia al tiempo en el cuál se está valorando la variable. 
+
+
+La función de densidad de la distribución normal se define así:
+
+\begin{equation}
+f(x_{t})=\frac{1}{\sqrt{2\pi\sigma^{2}}}e^{-(x-\mu)^{2}/2\sigma^{2}}
+\end{equation}
+Donde $\mu$ es la media y $\sigma^{2}$ la varianza.
+
+
+
+### Aproximación de la distribución binomial a la distribución normal 
+
+Sea $X$ cualquier variable aleatoria que tiene distribución binomial con parámetros $n$ y $p$.
+
+
+\begin{itemize}
+
+\item[a] Si $n\geq 30$, entonces la distribución binomial se puede aproximar a la distribución normal con $\mu=np$ y $\sigma^{2}=npq$
+\item[b] Si $np\geq 5$ y $n(1-p)\geq 5$, entonces también la distribución binomial se puede aproximar a la distribución normal con $\mu =np$, y $\sigma^{2}=npq$.
+
+En cualquiera de los casos se cumple que 
+
+\begin{equation}
+P(X\leq k)=B(k;n;p)=N\Big(\frac{k+0.5-np}{\sqrt{npq}}\Big)
+(\#eq:abn)
+\end{equation}
+
+La aproximación que se acaba de nombrar en la ecuación \@ref(eq:abn), establece que a mayor cantidad de ensayos, es más probable que estos se puedan leer a través de los parámetros de la distribución normal. Nuevamente se aclara que en este ejercicio se trabaja con la media y la varianza de los rendimientos, pues son estos los que presentan un comportamiento de una distribución normal ya que los precios presentan por lo general otro tipo de distribución.
+
+## Aplicación general
+
+La representación de los precios se hace con ayuda de los conceptos básicos de matemática financiera, en donde el valor futuro de un activo se calcula con ayuda del valor actual y un promedio geométrico en el tiempo que determina a que velocidad está creciendo el dinero.
+
+Sin embargo, la tasa a la que crecen los instrumentos financieros sujetos a incertidumbre contiene además de la tasa libre de riesgo, la volatilidad asociada a los rendimientos, ya que si se busca una mayor rentabilidad haciendo una inversión en una acción, esta debe ser mayor a la tasa libre de riesgo.
+
+Siendo $r$ la tasa libre de riesgo, el rendimiento promedio de un activo debería ser igual a $\mu=r+\frac{1}{2}\sigma^{2}$ donde $\sigma$ es la desviación estándar de los rendimientos, también conocida como la volatilidad.
+
+
+El concepto de valor del dinero en el tiempo en términos continuos se da por la ecuación
+
+\begin{equation}
+VF=VAe^{rt}
+\end{equation}
+
+Donde $VF$ es el valor futuro, $VA$ el valor actual, $r$ la tasa libre de riesgo y $t$ el tiempo. Esta ecuación es perfecta para un proceso determinista o un activo libre de riesgo que solo crece a una tasa $r$. 
+
+
+Una acción por otra parte podría valorarse de la siguiente forma:
+
+\begin{align}
+S_{t}=S_{0}e^{\mu t}
+\end{align}
+
+Donde $S_{t}$ es el precio futuro de la acción, $S_{0}$ el valor presente, $\mu$ la media de los rendimientos de la acción y $t$ el tiempo.
+
+Aunque a simple vista parece razonable, si se gráfica esta ecuación se podrá ver que el resultado no refleja realmente el comportamiento de una acción, ya que crece a una tasa constante. Por lo tanto, es necesario agregarle el proceso generador de la incertidumbre que está ligado a la volatilidad de los rendimientos y que en estadística 1 se conoce como el proceso de distribución normal estandar que tiene media $\mu=0$ y varianza $\sigma^{2}=1$ $X\sim Z(0,1)$.
+
+\begin{equation}
+S_{t}=S_{0}e^{\mu t+\sigma \sqrt{t}Z}
+\end{equation}
+
+
+
+
+
+```{r MTE,fig.cap= "Precios Instrumentos Financieros",echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(123)
+maturity <- 15
+simulation.length <- 1000
+dt <-  maturity/(simulation.length-1)
+
+tiempo <- seq(0,maturity, dt)
+
+S0<-1
+r<-0.05
+mu<-0.1
+mu0<-0.2
+sigma<-0.2
+sigma0<-0.375
+
+f <- h <- h0 <- rep(0, times=simulation.length)
+ h0[1]  <-  h[1] <- S0
+
+for(i in 2:simulation.length){
+  f[i] <- f[i-1]+sqrt(dt)*rnorm(1)
+  h[i] <- h[1]*exp((mu0-sigma0^2/2)*(i-1)*dt+sigma0*f[i])
+  h0[i] <- h0[1]*exp(mu0*(i-1)*dt)
+}
+
+o_range <- range(f,h,h0)
+
+plot(tiempo,f, ylim=o_range, type="l", col="coral1")
+lines(tiempo,h, col="orange")
+lines(tiempo,h0, col="chartreuse3")
+
+title(main="Precios de un Instrumento Financiero", col.main="blue", font.main=4)
+
+
+
+legend(1, o_range[2], c("Con Volatilidad","Sin Volatilidad ","Distribución Normal"), cex=0.8, 
+       col=c("orange","green","red"), pch=1, lty=1)
+```
+
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+set.seed(123)# Número Pseudo aleatorios
+caminatas <- function(s0, mu, sigma, nsims, periods) 
+{
+  # So precio spot
+  # mu tendencia (promedio de los rendimientos)
+  # sigma Volatilidad de los rendimientos
+  # nsim número de simulaciones
+  # periods Es un vector
+  
+  s0 = as.vector(s0)
+  nsteps = length(periods)
+  dt = c(periods[1], diff(periods))
+  
+  if( length(s0) == 1 ) {
+    drift = mu - 0.5 * sigma^2
+    if( nsteps == 1 ) {
+      s0 * exp(drift * dt + sigma * sqrt(dt) * rnorm(nsims))
+    } else {
+      temp = matrix(exp(drift * dt + sigma * sqrt(dt) * rnorm(nsteps * nsims)), nc=nsims)
+      for(i in 2:nsteps) temp[i,] = temp[i,] * temp[(i-1),]
+      s0 * temp
+    }
+  } else {
+    require(MASS)
+    drift = mu - 0.5 * diag(sigma)
+    n = length(mu)
+    
+    if( nsteps == 1 ) {
+      s0 * exp(drift * dt + sqrt(dt) * t(mvrnorm(nsims, rep(0, n), sigma)))
+    } else {
+      temp = array(exp(as.vector(drift %*% t(dt)) + t(sqrt(dt) * mvrnorm(nsteps * nsims, rep(0, n), sigma))), c(n, nsteps, nsims))
+      for(i in 2:nsteps) temp[,i,] = temp[,i,] * temp[,(i-1),]
+      s0 * temp
+    }
+  }
+  
+  
+  
+}
+
+s0 <- as.numeric(tail(TSLA$TSLA.Close,1)) # initial value
+mu <- mean(tsla) # drift (under the real-world measure)
+sigma <- sd(tsla) # volatility
+nsims=1000
+N=0:20
+n=20
+
+nsteps=0:20
+
+
+A=caminatas(s0,mu,sigma,nsims,0:20)
+
+matplot(N,A[,1:1000], type='l', xlab='días', ylab='Precio',main='TSLA')
+
+
+
+
+```
+
+```{r}
+
+```
+
+
+
+
+# Referencias
+
+
