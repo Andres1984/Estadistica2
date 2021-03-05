@@ -1,0 +1,277 @@
+---
+title: "Estimación por Intervalos"
+author: "Andrés Martínez"
+date: "3/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Análisis de Riesgo de Crédito
+
+Los datos se encuentran en la página web [kaggle](https://www.kaggle.com/fedesoriano/company-bankruptcy-prediction). El ejercicio se basa en determinar la posibilidad de quiebra de una empresa de acuerdo a unas  variables que determinan la salud financiera de la empresa.
+
+
+Primero vamos a escoger 4 variables sobre las que determinaremos la posibilidad de quiebra
+
+* ROA(A)
+* Cashflow Rate
+* Operating Gross Margin
+* NetValue Per Share
+
+Luego obtendremos los parámetros poblacionales de cada una de esas variables.
+
+Obtendremos la proporción de las empresas que entran en bancarrota.
+
+Determinaremos el tamaño de la muestra.
+
+Hallaremos los intervalos de cada uno de los estimadores.
+
+Analizaremos las posibilidades de que una empresa entre en quiebra de acuerdo a las variables que se escogieron.
+
+
+## Estimación por intervalos
+
+```{r ,echo=FALSE,warning=FALSE,message=FALSE}
+bkr <- read_csv("~/Downloads/GEM 1999 NES GLOBAL National Level Data/data-2.csv")
+bkr$bancarota=ifelse(bkr$`Bankrupt?`==1,"Yes","No")
+library(psych)
+options(scipen=999, digits = 6)
+resumen=as.data.frame(describe(bkr))
+
+```
+
+
+
+
+
+```{r}
+library(ggplot2)
+p<-ggplot(bkr, aes(x=bancarota, y= `ROA(A) before interest and % after tax`, color=bancarota)) +
+  geom_bar(stat="identity")
+p
+
+```
+
+
+```{r}
+p<-ggplot(bkr, aes(x=bancarota, y= `Operating Gross Margin`, color=bancarota)) +
+  geom_bar(stat="identity", fill="white")+theme_minimal()
+p
+
+```
+```{r}
+p<-ggplot(bkr, aes(x=bancarota, y= `Cash flow rate`, color=bancarota)) +
+  geom_bar(stat="identity", fill="white")+theme_minimal()
+p
+
+```
+
+
+
+```{r}
+library(dplyr)
+bkr %>%
+  ggplot() +
+  aes(x = `ROA(A) before interest and % after tax`, y = `Operating Gross Margin`, color=bancarota) +
+  geom_point() 
+
+```
+
+```{r}
+bkr %>%
+  ggplot() +
+  aes(x = `ROA(A) before interest and % after tax`, y = `Cash flow rate`, color=bancarota) +
+  geom_point() 
+```
+
+```{r}
+bkr %>%
+  ggplot() +
+  aes(x = `ROA(A) before interest and % after tax`, y = `Net Value Per Share (A)`, color=bancarota) +
+  geom_point() 
+```
+
+```{r}
+bkr %>%
+  ggplot() +
+  aes(x = `Cash flow rate`, y = `Operating Gross Margin`, color=bancarota) +
+  geom_point() 
+```
+
+```{r}
+bkr %>%
+  ggplot() +
+  aes(x =  `Net Value Per Share (A)`, y = `Operating Gross Margin`, color=bancarota) +
+  geom_point() 
+```
+
+
+Obtenemos los parámetros poblacionales
+
+```{r pressure, echo=FALSE}
+prop=sum(bkr$`Bankrupt?`)/length(bkr$`Bankrupt?`)
+proppop=mean(prop)
+sdprop=sqrt(prop*(1-prop))
+
+
+```
+
+
+
+```{r}
+mroa=mean(bkr$`ROA(A) before interest and % after tax`)
+mcfr=mean(bkr$`Cash flow rate`)
+mogm=mean(bkr$`Operating Gross Margin`)
+mnvps=mean(bkr$`Net Value Per Share (A)`)
+vroa=var(bkr$`ROA(A) before interest and % after tax`)
+vcfr=var(bkr$`Cash flow rate`)
+vogm=var(bkr$`Operating Gross Margin`)
+vnvps=var(bkr$`Net Value Per Share (A)`)
+sdroa=sd(bkr$`ROA(A) before interest and % after tax`)
+sdcfr=sd(bkr$`Cash flow rate`)
+sdogm=sd(bkr$`Operating Gross Margin`)
+sdnvps=sd(bkr$`Net Value Per Share (A)`)
+
+```
+
+## Definimos n
+
+Podemos usar la variable bancarota?
+
+Queremos tener un 95\% de nivel de confianza, por lo tanto,  con $\alpha=0.05$ igual a $1-\alpha=0.95$ obtenemos el valor de $n$.
+
+
+Siendo $Z_{\alpha/2}=Z_{0,025}=1.9599$ entonces $1.9599\frac{\sqrt{pq}}{\sqrt{n}}=B$
+
+
+```{r}
+z=qnorm(1-(0.05)/2)
+B=z*sdprop
+n=(z^2*prop*(1-prop))/B^2
+
+```
+
+
+```{r}
+hist(bkr$`Bankrupt?`,col="blue", main="Bancarota",xlab="Bancarota")
+```
+
+Usemos una  de las demás
+
+
+```{r}
+par(mfrow=c(2,2))
+hist(bkr$`ROA(A) before interest and % after tax`,breaks=50,col="red",xlab="ROA", main="ROA")
+hist(bkr$`Operating Gross Margin`,breaks=50,col="blue",xlab="OGM",main="OGM")
+hist(bkr$`Cash flow rate`,breaks=50,col="green",xlab = "CFR",main="CFR")
+hist(bkr$`Net Value Per Share (A)`,breaks=50,col="orange",xlab = "NVPS", main="NVPS")
+
+
+
+```
+
+Usemos el ROA para obtener la muestra.
+
+
+
+```{r}
+N=length(bkr$`Bankrupt?`)
+z=qnorm(1-(0.05)/2)
+B=z*sdroa
+n=(z^2*(mroa*(1-mroa)))/B^2
+
+
+```
+
+Tomamos el valor de $n$ y obtenemos una muestra aleatoria
+
+
+```{r}
+sample=bkr[sample(nrow(bkr), 57),]
+
+meansroa=mean(sample$`ROA(A) before interest and % after tax`)
+error1=mroa-meansroa
+
+meansogm=mean(sample$`Operating Gross Margin`)
+error2=mogm-meansogm
+
+
+meancfr=mean(sample$`Cash flow rate`)
+meannvps=mean(sample$`Net Value Per Share (A)`)
+
+meanbkr=mean(sample$`Bankrupt?`)
+
+
+```
+
+Como tenemos solo tenemos proporciones, ajustamos los intervalos de acuerdo a la distribución normal
+
+$$\hat{p}-Z_{\frac{\alpha}{2}}\frac{\sqrt{\hat{p}(1-\hat{p})}}{\sqrt{n}}< p <\hat{p}+Z_{\frac{\alpha}{2}}\frac{\sqrt{\hat{p}(1-\hat{p})}}{\sqrt{n}}$$
+Obtenemos el error
+
+```{r}
+
+seroa=sqrt(meansroa*(1-meansroa)/n)
+seogm=sqrt(meansogm *(1-meansogm)/n)
+secfr=sqrt(meancfr *(1-meancfr)/n)
+senvps=sqrt(meannvps *(1-meannvps)/n)
+sebkr=sqrt(meanbkr *(1-meanbkr)/n)
+```
+
+calculamos los intervalos
+```{r}
+introa=c(meansroa-qnorm(0.975)*seroa,meansroa+qnorm(0.975)*seroa)
+intogm=c(meansogm-qnorm(0.975)*seogm,meansogm+qnorm(0.975)*seogm)
+intcfr=c(meancfr-qnorm(0.975)*secfr,meancfr+qnorm(0.975)*secfr)
+intnvps=c(meannvps-qnorm(0.975)*senvps,meannvps+qnorm(0.975)*senvps)
+intbkr=c(meanbkr-qnorm(0.975)*sebkr,meanbkr+qnorm(0.975)*sebkr)
+```
+
+
+
+
+```{r}
+
+library(plotly)
+p<-ggplot(bkr, aes(x=bancarota, y=`ROA(C) before interest and depreciation before interest`, fill=bancarota)) +
+   geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`ROA(A) before interest and % after tax`, c(0, 0.9)))
+
+fig<-ggplotly(p)
+
+fig
+
+```
+
+```{r}
+p<-ggplot(bkr, aes(x=bancarota,y=`Operating Gross Margin`, color=bancarota)) + geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`Operating Gross Margin`, c(0.1, 0.9)))
+
+fig<-ggplotly(p)
+
+fig
+```
+
+
+```{r}
+p<-ggplot(bkr, aes(x=bancarota,y=`Cash flow rate`, color=bancarota)) +geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`Cash flow rate`, c(0.1, 0.9)))
+
+  
+
+fig<-ggplotly(p)
+
+fig
+```
+
+```{r}
+p<-ggplot(bkr, aes(x=bancarota, y=bkr$`Net Value Per Share (A)`, color=bancarota)) + geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`Net Value Per Share (A)`, c(0.05, 0.9)))
+
+fig<-ggplotly(p)
+
+fig
+```
+
+
+
+
