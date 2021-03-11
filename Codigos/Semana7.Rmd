@@ -35,7 +35,8 @@ Analizaremos las posibilidades de que una empresa entre en quiebra de acuerdo a 
 ## Estimación por intervalos
 
 ```{r ,echo=FALSE,warning=FALSE,message=FALSE}
-bkr <- read_csv("~/Downloads/GEM 1999 NES GLOBAL National Level Data/data-2.csv")
+library(readr)
+bkr <- read_csv("https://raw.githubusercontent.com/Andres1984/Estadistica2/master/Bases/data-2.csv")
 bkr$bancarota=ifelse(bkr$`Bankrupt?`==1,"Yes","No")
 library(psych)
 options(scipen=999, digits = 6)
@@ -109,7 +110,7 @@ bkr %>%
 ```
 
 
-Obtenemos los parámetros poblacionales
+Obtenemos los parámetros poblacionales y comprobamos si es insesgado
 
 ```{r pressure, echo=FALSE}
 prop=sum(bkr$`Bankrupt?`)/length(bkr$`Bankrupt?`)
@@ -150,7 +151,8 @@ Siendo $Z_{\alpha/2}=Z_{0,025}=1.9599$ entonces $1.9599\frac{\sqrt{pq}}{\sqrt{n}
 ```{r}
 z=qnorm(1-(0.05)/2)
 B=z*sdprop
-n=(z^2*prop*(1-prop))/B^2
+n=(z^2*(prop*(1-prop)))/B^2
+
 
 ```
 
@@ -181,7 +183,7 @@ Usemos el ROA para obtener la muestra.
 N=length(bkr$`Bankrupt?`)
 z=qnorm(1-(0.05)/2)
 B=z*sdroa
-n=(z^2*(mroa*(1-mroa)))/B^2
+n=round((z^2*(mroa*(1-mroa)))/B^2)
 
 
 ```
@@ -230,6 +232,71 @@ intnvps=c(meannvps-qnorm(0.975)*senvps,meannvps+qnorm(0.975)*senvps)
 intbkr=c(meanbkr-qnorm(0.975)*sebkr,meanbkr+qnorm(0.975)*sebkr)
 ```
 
+```{r}
+droa=density(bkr$`ROA(A) before interest and % after tax`)
+dogm=density(bkr$`Operating Gross Margin`)
+dcfr=density(bkr$`Cash flow rate`)
+dnvps=density(bkr$`Net Value Per Share (A)`)
+
+
+```
+
+```{r}
+dnorm_inte <- function(x){
+  introa=c(meansroa-qnorm(0.975)*seroa,meansroa+qnorm(0.975)*seroa)
+  return(introa)
+}
+```
+
+```{r}
+library(ggplot2)
+library(ggridges)
+theme_set(theme_minimal())
+
+a=ggplot(NULL, aes(x = bkr$`ROA(A) before interest and % after tax`)) 
+a= a + geom_density(alpha = 0.25)
+a = a + geom_vline(xintercept=c(introa),col="steelblue4",linetype="dashed")
+a = a + geom_vline(xintercept=mroa,col="red",linetype="dashed")
+a = a + labs(x="ROA",y="f(x)",title="Distribución de ROA")
+a
+
+```
+
+
+```{r}
+
+a=ggplot(NULL, aes(x = bkr$`Operating Gross Margin`)) 
+a= a + geom_density(alpha = 0.25)
+a = a + geom_vline(xintercept=c(intogm),col="steelblue4",linetype="dashed")
+a = a + geom_vline(xintercept=mogm ,col="red",linetype="dashed")
+a = a + labs(x="OGM",y="f(x)",title="Distribución de OGM")
+a
+
+
+
+```
+
+```{r}
+
+a=ggplot(NULL, aes(x = bkr$`Cash flow rate`)) 
+a= a + geom_density()
+a = a + geom_vline(xintercept=c(intcfr ),col="steelblue4",linetype="dashed")
+a = a + geom_vline(xintercept=mcfr ,col="red",linetype="dashed")
+a = a + labs(x="CFR",y="f(x)",title="Distribución de CFR")
+a
+
+```
+
+```{r}
+
+a=ggplot(NULL, aes(x = bkr$`Net Value Per Share (A)`)) 
+a= a + geom_density()
+a = a + geom_vline(xintercept=c(intnvps ),col="steelblue4",linetype="dashed")
+a = a + geom_vline(xintercept=mnvps ,col="red",linetype="dashed")
+a = a + labs(x="NVPS",y="f(x)",title="Distribución de NPVS")
+a
+
+```
 
 
 
@@ -237,7 +304,7 @@ intbkr=c(meanbkr-qnorm(0.975)*sebkr,meanbkr+qnorm(0.975)*sebkr)
 
 library(plotly)
 p<-ggplot(bkr, aes(x=bancarota, y=`ROA(C) before interest and depreciation before interest`, fill=bancarota)) +
-   geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`ROA(A) before interest and % after tax`, c(0, 0.9)))
+   geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`ROA(A) before interest and % after tax`, c(0, 0.9)))+labs(x="Bancarota",y="ROA",title="Boxplot ROA")
 
 fig<-ggplotly(p)
 
@@ -246,7 +313,7 @@ fig
 ```
 
 ```{r}
-p<-ggplot(bkr, aes(x=bancarota,y=`Operating Gross Margin`, color=bancarota)) + geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`Operating Gross Margin`, c(0.1, 0.9)))
+p<-ggplot(bkr, aes(x=bancarota,y=`Operating Gross Margin`, color=bancarota)) + geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`Operating Gross Margin`, c(0.1, 0.9)))+ labs(x="Bancarota",y="OGM",title="Boxplot OGM")
 
 fig<-ggplotly(p)
 
@@ -255,7 +322,7 @@ fig
 
 
 ```{r}
-p<-ggplot(bkr, aes(x=bancarota,y=`Cash flow rate`, color=bancarota)) +geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`Cash flow rate`, c(0.1, 0.9)))
+p<-ggplot(bkr, aes(x=bancarota,y=`Cash flow rate`, color=bancarota)) +geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`Cash flow rate`, c(0.1, 0.9)))+labs(x="Bancarota",y="CFR",title="Boxplot CFR")
 
   
 
@@ -265,13 +332,10 @@ fig
 ```
 
 ```{r}
-p<-ggplot(bkr, aes(x=bancarota, y=bkr$`Net Value Per Share (A)`, color=bancarota)) + geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`Net Value Per Share (A)`, c(0.05, 0.9)))
+p<-ggplot(bkr, aes(x=bancarota, y=bkr$`Net Value Per Share (A)`, color=bancarota)) + geom_boxplot(outlier.shape = NA)+coord_cartesian(ylim = quantile(bkr$`Net Value Per Share (A)`, c(0.05, 0.9)))+labs(x="Bancarota",y="NPVS",title="Boxplot NPVS")
 
 fig<-ggplotly(p)
 
 fig
 ```
-
-
-
 
