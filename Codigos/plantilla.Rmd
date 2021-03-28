@@ -1,0 +1,257 @@
+---
+title: "Dispositivo pedagógico Estadística 1"
+author: "Andrés Martínez"
+date: "`r Sys.Date()`"
+site: "bookdown::bookdown_site"
+output:
+  bookdown::gitbook: default
+documentclass: book
+
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE)
+require("knitcitations")
+cleanbib()
+options("citation_format" = "pandoc")
+read.bibtex(file = "B.bib")
+
+```
+
+
+```{r, echo=FALSE, message=FALSE,results='hide',warning=FALSE}
+#install.packages("bookdown")
+#Librerias que se van a utilizar
+library(kableExtra)# Tablas
+library(quantmod)# Descarga de datos
+library(knitcitations)#Citaciones
+library(knitr)#R Markdown
+library(psych)# Medidas descriptivas
+library(RCurl)# La dirección web
+library(readr)# La base de datos
+library(dplyr)# Transformación de tablas
+library(plotly)# Gráficos Interactivos
+library(ggplot2)# Gráficos 
+library(corrplot)# Gráfico de Correlación
+library(derivmkts)# Pronóstico de Precios
+library(quadprog)# Programación puede necesitar otra actualización dependiendo de la versión del R
+library(PerformanceAnalytics)# Medidas descriptivas
+#install.packages("IntroCompFinR",repos="http://R-Forge.R-project.org")
+library(IntroCompFinR)# Portafolio de optimización solo se puede instalar con el link descrito arriba
+
+```
+
+
+# Conceptos Aplicados de Estadístca 1
+
+
+
+
+Así mismo se genera una serie de gráficos descriptivos que dan una primera visualización de los datos para encontrar patrones y entender el comportamiento de cada una de las observaciones.
+
+
+## Metodología del ejemplo.
+
+
+
+Estas  etapas se pueden describir en dos fases:
+
+### Primera Fase
+
+
+* Exploración de datos.
+* Medición de y análisis a través de procesos descriptivos.
+* Implementación de estrategias basadas en la toma decisiones que se derivan de un análisis descriptivo.
+
+### Segunda Fase
+
+
+
+
+* Desarrollo de procesos continuos
+* Medición de procesos continuos a través del valor esperado y la
+varianza.
+* Diseño de estrategias a partir de escenarios de incertidumbre.
+
+
+
+# Primera Fase
+
+xxxxx valor esperado.
+
+## Exploración de datos
+
+x x [NASDAQ](https://www.nasdaq.com) , el [Dow Jones](https://www.dowjones.com) y el [S&P500](https://espanol.spindices.com/indices/equity/sp-500), xxxxx
+
+
+
+```{r, echo=FALSE, message=FALSE,results='hide',warning=FALSE}
+
+library(RCurl)# La dirección web
+library(readr)# La base de datos
+library(dplyr)# Para usar el mutate
+text=getURL("https://raw.githubusercontent.com/Andres1984/Estadistica-1/master/SPlista.txt")
+SPlista <- read_csv(file=text)
+SPlista$Sector[SPlista$Sector=="Consumer Discretionary"]="Cons D"
+SPlista$Sector[SPlista$Sector=="Information Technology"]="IT"
+SPlista$Sector[SPlista$Sector=="Telecommunications Services"]="TS"
+SPlista$Sector[SPlista$Sector=="Consumer Staples"]="Cons S"
+attach(SPlista)
+fabs<-table(Sector)
+fabs=as.data.frame(fabs)
+n=dim(SPlista)
+n<-n[1]
+fabs= mutate(fabs, Freqr =fabs$Freq/n)
+fabs= mutate(fabs, FreqA =cumsum(Freq))
+fabs= mutate(fabs, FreqrA =cumsum(Freqr))
+
+
+```
+
+Así se hacen las tablas, necesitan la libreri 
+
+
+```{r TFREQ, echo=FALSE, message=FALSE}
+library('knitr')
+library(kableExtra)# Tablas
+options(digits=4, width=70)## Se ajsutan los decimales
+kable(fabs,booktabs=TRUE,caption = "Tabla de Frecuencias")%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+```
+
+
+```{r FREQ, echo=FALSE, message=FALSE, fig.cap = 'Gráfico de Barras'}
+library(ggplot2)
+
+ggplot(data=fabs, aes(x=Sector, y=Freq)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=Freq), vjust=1.6, color="white", size=3.5)+
+  theme_minimal()
+
+```
+
+
+xxx
+### Contexto del Ejemplo
+
+xxxx
+
+xx
+
+
+```{r, echo=FALSE, message=FALSE,results='hide',warning=FALSE}
+library(quantmod)# Descarga de datos
+symbols=c('AES','AXP','BXP','GLW')# Vector de caracteres
+getSymbols(symbols,src='yahoo',from="2017-01-01",to="2019-03-01")
+
+```
+
+
+xxxx
+
+```{r Precios, fig.width = 8, fig.height = 4,fig.cap=" Precios Acciones", echo=FALSE, message=FALSE}
+
+par(mfrow=c(2,2))
+plot(AES$AES.Close, col="green",main = "AES")
+plot(AXP$AXP.Close,col="red",main="AXP")
+plot(BXP$BXP.Close,col="blue",main="BXP")
+plot(GLW$GLW.Close,main="GLW")
+
+
+```
+
+
+
+
+```{r vol, echo=FALSE, message=FALSE,fig.cap='Rendimientos'}
+aes = Delt(AES$AES.Close)*100 # Rendimientos
+aes=aes[-1,]
+axp = Delt(AXP$AXP.Close)*100
+axp=axp[-1,]
+bxp =Delt(BXP$BXP.Close)*100
+bxp=bxp[-1,]
+glw = Delt(GLW$GLW.Close)*100
+glw=glw[-1,]
+
+par(mfrow=c(2,2))
+plot(aes)
+plot(axp)
+plot(bxp)
+plot(glw)
+
+
+
+```
+
+xxx
+## Medición y análisis a través de procesos descriptivos.
+
+
+```{r TED, echo=FALSE, message=FALSE,warning=FALSE}
+library(psych)
+library('knitr')
+rend1=cbind(aes,axp,bxp,glw)
+colnames(rend1)=c("aes","axp","bxp","glw")
+rend1=describe(rend1)
+kable(rend1[,3:9], booktabs=TRUE,caption = "Estadísticas Descriptivas")%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+```
+otra tabla
+```{r TED1, echo=FALSE, message=FALSE,warning=FALSE}
+library('knitr')
+kable(rend1[,10:13], booktabs=TRUE,caption = "Estadísticas Descriptivas")%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+
+
+
+xxxx
+
+
+
+```{r HIST, echo=FALSE,fig.cap='Histogramas', message=FALSE,warning=FALSE,echo=FALSE}
+par(mfrow=c(2,2))
+rend=cbind(aes,axp,bxp,glw)
+colnames(rend)=c("aes","axp","bxp","glw")
+
+hist(as.numeric(rend$aes),breaks=20,main="",xlab="Rendimientos AES", col="red")
+hist(as.numeric(rend$axp),breaks=20,main="",xlab="Rendimientos AXP", col="green")
+hist(as.numeric(rend$bxp),breaks=20,main="",xlab="Rendimientos BXP", col="yellow")
+hist(as.numeric(rend$glw),breaks=20,main="",xlab="Rendimientos GLW", col="blue")
+
+
+
+
+```
+
+
+xxxx
+```{r TCORR, echo=FALSE, message=FALSE,warning=FALSE,echo=FALSE}
+
+kable(cor(rend), booktabs=TRUE, caption = "Correlación")%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+```
+
+
+```{r CORR,fig.cap='Correlación', echo=FALSE, message=FALSE,warning=FALSE,echo=FALSE}
+
+library(corrplot)
+corrplot(cor(rend))
+```
+
+
+xxxx
+## Estrategia de negociación
+
+xxxx
+\begin{equation}
+r_{p}=C*W_{1}*r_{1}+C*W_{2}*r_{2}+C*W_{3}*r_{3}+C*W_{4}*r_{4}
+(\#eq:PPP)
+\end{equation}
+xxxx
+
+
