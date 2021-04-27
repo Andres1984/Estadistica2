@@ -1,0 +1,88 @@
+---
+title: "Mi primer modelo"
+author: "Andrés Martínez"
+date: "4/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Logit Model
+
+Vamos a generar un modelo en donde obtenemos la probabildad de pertenecer a un grupo, en donde la variable que se usa para clasificación puede ser una variable dicotómico que toma valores de 0 y 1.
+
+$$ P(X)=\beta_{0}+\beta_{1}X$$
+Por lo tanto se desear saber $P(X)=P(Y=1\mid X=1)$. Para establecer los valores entre $0$ y $1$, es necesario generar una función exponencial como por ejemplo la función logística
+
+$$log\Big(\frac{P(X}{1-P(X)}\Big)=\beta_{0}+\beta_{1}X$$
+
+La predicción se hace con la siguiente ecuación:
+
+$$ \hat{p}(X)=\frac{e^{\beta_{0}+\beta_{1}X}}{1+e^{\beta_{0}+\beta_{1}X}}$$
+
+
+```{r}
+library(psych)
+describe(Default)
+```
+
+
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+# Regression model
+pd<- glm( default ~ student, data=Default, family=binomial)
+
+a=predict(pd, type="response")
+a=as.data.frame(a)
+a=cbind(a,Default$student)
+plot(a$`Default$student`,a$a,type="l", main="Probabilidad de Default", xlab="Estudiante",ylab="P(X)")
+
+newdata[, c("p", "se")] <- predict(pd, newdata, type = "response", se.fit = TRUE)[-3]
+
+# Get predictions on link scale
+pred =predict(pd, Default, se.fit=TRUE, type="response")[c("fit", "se.fit")]
+pred=as.data.frame(pred)
+# Calculate fit and confidence interval on probability scale
+pred$upr = pd$family$linkinv(pred$fit + 1.96*pred$se.fit)  # Equivalent to pnorm(pred$fit + 1.96*pred$se.fit) for the probit link
+pred$lwr = pd$family$linkinv(pred$fit - 1.96*pred$se.fit)
+pred$fit = pd$family$linkinv(pred$fit)
+```
+
+
+```{r}
+pd<- glm( default ~ balance, data=Default, family=binomial)
+y=seq(0,3000,0.25)[-1]
+
+
+sup=exp(pd$coefficients[1]+pd$coefficients[2]*y)
+inf=1+exp(pd$coefficients[1]+pd$coefficients[2]*y)
+px=sup/inf
+result=as.data.frame(cbind(y,px))
+colnames(result)=c("Balance","PX")
+plot(result$Balance,result$PX,type="l", main="Probabilidad de Default", xlab="Balance",ylab="P(X)",ylim = c(0,1))
+abline(h=c(0,1))
+```
+
+
+
+
+Predicción
+
+```{r }
+glm.probs=predict(pd,type = "response")
+glm.pred=rep("No",10000)
+glm.pred[glm.probs>.5]="Yes"
+table(glm.pred,Default$default) 
+
+
+```
+
+```{r}
+preci=(9625+100)/10000
+preci
+```
+
