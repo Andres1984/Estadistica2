@@ -1,0 +1,204 @@
+---
+title: "ANOVA"
+author: "Andrés Martínez"
+date: "2/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE,warning=FALSE,message=FALSE}
+library(dplyr) # Manipulación bases
+library(psych) # Estadísticas
+library(readstata13)# Leer datos Stata
+library(rstatix) #ANOVA test
+```
+
+
+## ANOVA - MANOVA
+
+
+Ejercicio de contraste de resultados muy poco usado pero con muchas aplicaciones.
+
+
+* El objetivo de ANOVA es equivalente (inicialmente) a llevar a cabo una prueba de inferencia de medias.
+
+* ANOVA propone dividir la varianza total de un fenomeno que se puede esplicar por la varianza del tratamiento o característica z por un componente desconocido.
+
+* Se quiere identificar si existen diferencias sistemáticas para una variable entre categorías /clasificaciones / características y que las diferencias no estén asociadas a selección fortuita de observaciones.
+
+* En anova la varianza total se explica por la varianza del tratamiento o característica y por la varianza de un componente desconocido.
+
+* ANOVA divide la varianza total en un componente que se define como aleatorio y un componente atribuible a la asignación entre un grupo.
+
+* So la varianza de dos grupos no es diferente de la varianza total, entonces tenemos capacidad de decir que entre características o tratamientos no hay diferencia.
+
+* Esta idea no es diferente del ejercicio de regresión.
+
+* El anáilisis de regresión, se presenta como variable dependiente que se está analizando y como variable independiente la característica o tratamiento.
+
+* Una razón valiosa para la prueba multivariada de medias, en lugar de la prueba univariada, es examinar la diferencia entre más de una categoría la inclusión de la relación existente entre variables respecto a la clasif 
+ión.
+
+* Se tiene la variable que representan resultado y variables que representan tratamiento o característica.
+
+
+### Ejemplo
+
+En este caso el resultado está dado por $y_{1}$ y el tratamiento o característica $x_{1}$.
+
+
+```{r}
+resultado=c(2,3,1,6,7,5)
+tratamiento=c(0,0,0,1,1,1)
+df=as.data.frame(cbind(resultado,tratamiento))
+summary(resultado[1:3])
+summary(resultado[4:6])
+t.test(df$resultado,df$tratamiento)
+```
+
+
+
+
+```{r}
+library(readr)
+encuesta=read_csv("https://raw.githubusercontent.com/Andres1984/Data-Analysis-with-R/master/Bases/2016.csv")
+summary(encuesta)
+
+colnames(encuesta)[4]="HS"
+colnames(encuesta)[7]="GDP"
+colnames(encuesta)[9]="Health"
+colnames(encuesta)[11]="Trust"
+encuesta$df=ifelse(encuesta$HS<5,0,1)
+```
+
+
+```{r}
+res.aov <- encuesta %>% anova_test(GDP ~ df,detailed = TRUE)
+res.aov
+```
+
+
+
+```{r}
+a=by(data = encuesta$GDP, INDICES = encuesta$df, FUN = describe)
+A=rbind(a$`0`,a$`1`)
+rownames(A)=c(0,1)
+A
+```
+
+En este recuadro encontramos las estadísticas descriptivas de acuerdo a cada grupo 
+
+```{r}
+res.aov1=aov(GDP ~  as.factor(df), data=encuesta)
+b=TukeyHSD(res.aov1)
+b=as.data.frame( b$`as.factor(df)`)
+rownames(b)="combined"
+b
+```
+
+Se genera un anova conbinado que muestra las diferencias de medias, el límite inferior y el límite superior
+
+
+```{r}
+pwc3 <- encuesta %>% pairwise_t_test(GDP ~ df, pool.sd = TRUE, p.adjust.method = "bonferroni" ,detailed = TRUE )
+pwc3
+```
+
+Se genera un anova para cada año con el ajute de bonferroni
+
+
+Cambio de labels
+
+
+```{r}
+d=unique(encuesta$Region)
+encuesta$tabla[encuesta$Region == d[1] | encuesta$Region == d[7] ]="Europa"
+encuesta$tabla[encuesta$Region == d[2]]="NortAm"
+encuesta$tabla[encuesta$Region == d[3] | encuesta$Region == d[6] ]="SouthAsia" 
+encuesta$tabla[encuesta$Region == d[4] | encuesta$Region == d[9]]="ArabWorld"
+encuesta$tabla[encuesta$Region == d[5]]="LatinAm"
+encuesta$tabla[encuesta$Region == d[8] | encuesta$Region == d[10]]="Asia"
+
+
+```
+
+
+```{r}
+res.aov2 <- encuesta %>% anova_test(GDP ~ df + as.factor(tabla),detailed = TRUE)
+res.aov2
+```
+
+Se obtiene el anova usando los lugares de la casa adicional al período.
+
+
+```{r}
+res.aov3=aov(GDP ~  as.factor(df)+ as.factor(tabla), data=encuesta)
+            
+             
+d=TukeyHSD(res.aov3)
+e=as.data.frame( d$`as.factor(df)`)
+f=as.data.frame(d$`as.factor(tabla)`) 
+rownames(e)="combined"
+d
+e
+f
+```
+
+
+Se obtiene el anova con las diferencias entre lugares
+
+```{r}
+library("ggpubr")
+ggboxplot(encuesta, x = "df", y = "GDP", 
+          color = "df", palette = c("#00AFBB", "#E7B800"),
+        ylab = "GDP", xlab = "Grupos")
+```
+
+```{r}
+library("ggpubr")
+ggboxplot(encuesta, x = "tabla", y = "GDP", 
+          color = "tabla", palette = c("red", "orange","blue","green","cyan","pink"),
+        ylab = "Wifi Mbps", xlab = "Grupos")
+```
+
+```{r}
+res.aov4 <- encuesta %>% anova_test(GDP ~ tabla, between = Region,within = Region,detailed = TRUE)
+res.aov4
+```
+
+```{r}
+library("margins")
+lma=lm(GDP~tabla -1, data = encuesta)
+summary(lma)
+marg=margins(lma,vce="delta")
+marg
+```
+
+
+```{r}
+library("ggplot2")
+ggplot(encuesta, aes(x=tabla, y=GDP, fill=as.character(df))) + geom_boxplot()
+```
+
+```{r}
+library("ggpubr")
+ggline(encuesta, x = "tabla", y = "GDP", color = "df",
+       add = c("mean_se"))+theme(legend.position = "none")
+```
+
+
+```{r}
+
+encuesta$tabla1[encuesta$tabla == "Europa"]=1
+encuesta$tabla1[encuesta$tabla == "NortAm"]=2
+encuesta$tabla1[encuesta$tabla == "SouthAsia"]=3
+encuesta$tabla1[encuesta$tabla == "ArabWorld"]=4
+encuesta$tabla1[encuesta$tabla == "LatinAm"]=5
+encuesta$tabla1[encuesta$tabla == "Asia"]=6
+g=dydx(encuesta, lma, "tabla1" )
+g[1,]
+```
+
