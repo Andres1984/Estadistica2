@@ -1,0 +1,35 @@
+---
+title: "Mi primer Markdown"
+author: "Andrés Martínez"
+date: "6/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Repaso de Estadística 1
+
+* Variable aleatoria
+* Probabilidad Condicionada y Teorema de Bayes
+* Distribuciones Continuas
+* Distribuciónes Discretas
+* Regresión lineal 
+
+## Variable aleatoria 
+
+Una variable aleatoria puede ser continua o discreta por ejemplo el ingreso de las personas es una variable continua y el número de empleados de diferentes empresas de un sector.
+
+
+```{r}
+
+```
+
+### Sub sección
+
+
+```{r}
+
+```
+
