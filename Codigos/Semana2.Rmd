@@ -14,11 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 Para entender un poco mejor los métodos de muestreo, vamos a utilizar una base de datos que contiene los índices de felicidad de 150 países. El puesto de cada país se determina de acuerdo a unos criterios que incrementan el puntaje. El país con mayor puntaje es más feliz. 
 
 ```{r ,echo=FALSE,warning=FALSE,message=FALSE}
-library(httr)# Otra forma de encontrar direcciones
-library(readr)# La base de datos en cvs o txt
-url1<-'https://raw.githubusercontent.com/Andres1984/Data-Analysis-with-R/master/Bases/2016.csv'
-GET(url1, write_disk(text <- tempfile(fileext = ".csv"))) 
-H2016 <- read_csv(file=text)
+library(readr)
+H2016 <- read_csv("https://raw.githubusercontent.com/Andres1984/Data-Analysis-with-R/master/Bases/2016.csv")
 ```
 
 
