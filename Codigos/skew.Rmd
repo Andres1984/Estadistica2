@@ -80,13 +80,17 @@ fit_t_distribution <- function(returns) {
 # Fit t-distributions to each stock's returns
 t_distribution_params <- lapply(returns_data, fit_t_distribution)
 
-# Example: Weighting by skewness (replace this with your own strategy)
+# Example: Weighting by skewness 
 skewness_weights <- skewness_results / sum(skewness_results)
+
+kurtosis_weights <- kurtosis_results / sum(kurtosis_results)
+
+combined_weights<-(skewness_weights+kurtosis_weights)/sum(skewness_weights+kurtosis_weights)
 
 # Create the portfolio
 portfolio <- lapply(seq_along(returns_data), function(i) {
   returns <- returns_data[[i]]
-  weight <- skewness_weights[i]
+  weight <- combined_weights[i]
   return(returns * weight)
 })
 
@@ -328,6 +332,7 @@ abline(v=inv+inv*qnorm(0.1)*volrend, col="black")
 
 
 ```
+
 
 
 
