@@ -109,6 +109,9 @@ plot_portfolio_weights_plotly <- function(stock_weights, stock_symbols) {
 portfolio_weights_plot <- plot_portfolio_weights_plotly(weights, stock_symbols)
 ```
 
+Portafolio
+=======================================================================
+
 Column {data-width=650}
 -----------------------------------------------------------------------
 
@@ -132,4 +135,132 @@ portfolio_returns_chart <- plot_ly(x = index(returns_data[[1]]), y = cumsum(port
 # Display the plots
 subplot(skew_kurtosis_chart, portfolio_returns_chart, nrows = 2)
 ```
+
+Densidad KO
+=======================================================================
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Valor en Riesgo
+
+¿Cuanto es lo máximo que podrìa llegar a perder como resultado de una caida del precio de la acción si yo compro 100 acciones por 20 días?
+
+```{r}
+
+medrend=mean(returns_data[[1]]) # media de los rendimientos
+volrend=sd(returns_data[[1]])## volatilidad de los rendimiento
+
+inv=100*as.numeric(tail(stock_data[[1]]$KO.Close,1))
+
+VeR1=inv*qnorm(0.01)*volrend*sqrt(20) ### VaR=Inversión*Valor Z de la distribución normal* Volatilidad
+VeR5=inv*qnorm(0.05)*volrend*sqrt(20)
+VeR10=inv*qnorm(0.1)*volrend*sqrt(20)
+VeR1
+VeR5
+VeR10
+
+```
+
+### VaR con Inversión 20 días
+
+```{r}
+### simulación 
+sim=rnorm(10000,inv,inv*volrend*sqrt(20))
+
+hist(sim, breaks=100, col="blue", main="Valor en Riesgo de KO en 20 días")
+abline(v=inv+inv*volrend*sqrt(20), col="red")
+abline(v=inv-inv*volrend*sqrt(20), col="red")
+abline(v=inv+inv*qnorm(0.01)*volrend*sqrt(20), col="green")
+abline(v=inv+inv*qnorm(0.05)*volrend*sqrt(20), col="yellow")
+abline(v=inv+inv*qnorm(0.1)*volrend*sqrt(20), col="black")
+
+
+
+```
+
+
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Grafico
+
+```{r}
+### simulación 
+sim=rnorm(10000,medrend,volrend)
+
+hist(sim, breaks=100, col="blue", main="Valor en Riesgo de KO un día")
+abline(v=medrend-volrend, col="red")
+abline(v=medrend+volrend, col="red")
+abline(v=medrend+qnorm(0.01)*volrend, col="green")
+abline(v=medrend+qnorm(0.05)*volrend, col="yellow")
+abline(v=medrend+qnorm(0.1)*volrend, col="black")
+
+
+```
+
+
+### VaR con Inversión
+
+```{r}
+### simulación 
+sim=rnorm(10000,inv,inv*volrend)
+
+hist(sim, breaks=100, col="blue", main="Valor en Riesgo de KO un día")
+abline(v=inv+inv*volrend, col="red")
+abline(v=inv-inv*volrend, col="red")
+abline(v=inv+inv*qnorm(0.01)*volrend, col="green")
+abline(v=inv+inv*qnorm(0.05)*volrend, col="yellow")
+abline(v=inv+inv*qnorm(0.1)*volrend, col="black")
+
+
+
+```
+
+Densidad 20 días
+=======================================================================
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Valor en Riesgo
+Obtenga la densidad a 20 días de las demás acciones
+
+```{r}
+
+medrend=mean(returns_data[[1]]) # media de los rendimientos
+volrend=sd(returns_data[[1]])## volatilidad de los rendimiento
+
+inv=100*as.numeric(tail(stock_data[[1]]$KO.Close,1))
+
+VeR1=inv*qnorm(0.01)*volrend*sqrt(20) ### VaR=Inversión*Valor Z de la distribución normal* Volatilidad
+VeR5=inv*qnorm(0.05)*volrend*sqrt(20)
+VeR10=inv*qnorm(0.1)*volrend*sqrt(20)
+VeR1
+VeR5
+VeR10
+
+```
+
+### VaR con Inversión 20 días
+
+```{r}
+### simulación 
+sim=rnorm(10000,inv,inv*volrend*sqrt(20))
+
+hist(sim, breaks=100, col="blue", main="Valor en Riesgo de KO en 20 días")
+abline(v=inv+inv*volrend*sqrt(20), col="red")
+abline(v=inv-inv*volrend*sqrt(20), col="red")
+abline(v=inv+inv*qnorm(0.01)*volrend*sqrt(20), col="green")
+abline(v=inv+inv*qnorm(0.05)*volrend*sqrt(20), col="yellow")
+abline(v=inv+inv*qnorm(0.1)*volrend*sqrt(20), col="black")
+
+
+
+```
+
 
