@@ -1,0 +1,135 @@
+---
+title: "Sesgo y Curtosis"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(quantmod)
+library(moments)
+library(plotly)
+library(MASS)
+library(quantmod)
+library(moments)
+library(plotly)
+
+
+library(MASS)
+
+
+
+# Define stock symbols and date range
+stock_symbols <- c("KO", "TSLA", "BA", "JPM", "MMM")
+start_date <- "2021-01-01"
+end_date <- Sys.Date()  # Assuming you want data up to the current date
+
+# Fetch stock price data
+stock_data <- lapply(stock_symbols, function(symbol) {
+  getSymbols(symbol, from = start_date, to = end_date, auto.assign = FALSE)
+})
+
+
+returns_data <- lapply(stock_data, function(stock) {
+  daily_returns <- diff(log(Cl(stock)))
+  colnames(daily_returns) <- gsub("\\.[A-z]*", "", colnames(daily_returns))
+  return(daily_returns)
+})
+
+# Remove the first row from each stock's returns
+returns_data <- lapply(returns_data, function(returns) {
+  tail(returns, -1)
+})
+
+
+skewness_results <- sapply(returns_data, function(returns) {
+  calculate_skewness <- function(x) {
+    mean_x <- mean(x)
+    sd_x <- sd(x)
+    skewness <- sum((x - mean_x)^3) / length(x) / (sd_x^3)
+    return(skewness)
+  }
+  
+  skewness <- sapply(returns, calculate_skewness)
+  return(skewness)
+})
+
+kurtosis_results <- sapply(returns_data, function(returns) {
+  calculate_kurtosis <- function(x) {
+    mean_x <- mean(x)
+    sd_x <- sd(x)
+    kurtosis <- sum((x - mean_x)^4) / length(x) / (sd_x^4) - 3
+    return(kurtosis)
+  }
+  
+  kurtosis <- sapply(returns, calculate_kurtosis)
+  return(kurtosis)
+})
+
+# Function to fit a t-distribution to returns
+fit_t_distribution <- function(returns) {
+  fit <- suppressWarnings(fitdistr(returns, densfun = "t"))
+  df <- fit$estimate["df"]
+  mean <- fit$estimate["mean"]
+  sd <- fit$estimate["sd"]
+  return(list(df = df, mean = mean, sd = sd))
+}
+
+# Fit t-distributions to each stock's returns
+t_distribution_params <- lapply(returns_data, fit_t_distribution)
+
+# Example: Weighting by skewness (replace this with your own strategy)
+skewness_weights <- skewness_results / sum(skewness_results)
+
+# Create the portfolio
+portfolio <- lapply(seq_along(returns_data), function(i) {
+  returns <- returns_data[[i]]
+  weight <- skewness_weights[i]
+  return(returns * weight)
+})
+
+# Combine the portfolio returns
+portfolio_returns <- rowSums(do.call(cbind, portfolio))
+
+
+# Create a function to plot portfolio weights using plotly
+plot_portfolio_weights_plotly <- function(stock_weights, stock_symbols) {
+  # Create a plotly bar chart
+  plot <- plot_ly(x = stock_symbols, y = stock_weights, type = "bar", name = "Portfolio Weights", marker = list(color = "green")) %>%
+    layout(title = "Portfolio Weights",
+           xaxis = list(title = "Stocks"),
+           yaxis = list(title = "Weight"))
+  
+  return(plot)
+}
+
+# Create a portfolio weights plot using plotly
+portfolio_weights_plot <- plot_portfolio_weights_plotly(weights, stock_symbols)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Análisis de Sesgo y Curtosis
+
+```{r}
+# Create a bar chart for skewness and kurtosis
+skew_kurtosis_chart <- plot_ly(x = stock_symbols) %>%
+  add_trace(y = skewness_results, name = "Skewness", type = "bar", marker = list(color = "blue")) %>%
+  add_trace(y = kurtosis_results, name = "Kurtosis", type = "bar", marker = list(color = "red")) %>%
+  layout(title = "Skewness and Kurtosis Comparison",
+         xaxis = list(title = "Stocks"),
+         yaxis = list(title = "Value"))
+
+# Create a line chart for the portfolio returns
+portfolio_returns_chart <- plot_ly(x = index(returns_data[[1]]), y = cumsum(portfolio_returns), type = "scatter", mode = "lines", name = "Portfolio Returns") %>%
+  layout(title = "Portfolio Returns Based on Skewness-Weighted Allocation",
+         xaxis = list(title = "Date"),
+         yaxis = list(title = "Portfolio Returns"))
+
+# Display the plots
+subplot(skew_kurtosis_chart, portfolio_returns_chart, nrows = 2)
+```
+
